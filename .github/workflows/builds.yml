@@ -1,9 +1,6 @@
 name: docker build
 on: push
 
-## Top-level least-privilege cap (OSSF Scorecard Token-Permissions).
-## The single 'build' job below only checks out, runs apt and a
-## shell build script; no API writes needed.
 permissions:
     contents: read
 
