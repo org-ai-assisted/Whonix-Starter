@@ -25,6 +25,30 @@ jobs:
               uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744  # v3
               with:
                   persist-credentials: false
+
+            ## debian:stable's /etc/apt/apt.conf.d/docker-clean wipes
+            ## /var/cache/apt/archives after every apt-get install -
+            ## defeats the cache. Drop it and tell apt to keep the
+            ## downloaded .debs so the cache action below can save
+            ## them at end-of-job.
+            - name: Configure apt to keep downloaded debs
+              run: |
+                  rm -f /etc/apt/apt.conf.d/docker-clean
+                  printf '%s\n' 'Binary::apt::APT::Keep-Downloaded-Packages "true";' \
+                      > /etc/apt/apt.conf.d/keep-cache
+
+            ## First-party actions/cache. Caches the .deb archive
+            ## directory. On hit, apt-get install reuses cached debs
+            ## instead of redownloading from the Debian mirror.
+            ## Key includes the workflow-file hash so the cache
+            ## invalidates whenever the package list changes.
+            - name: Cache apt packages
+              uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
+              with:
+                  path: /var/cache/apt/archives
+                  key: ${{ runner.os }}-apt-${{ matrix.image }}-${{ hashFiles('.github/workflows/builds.yml') }}
+                  restore-keys: |
+                      ${{ runner.os }}-apt-${{ matrix.image }}-
             # - name: Checkout developer-meta-files
             #   uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744  # v3
             #   with:
