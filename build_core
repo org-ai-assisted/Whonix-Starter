@@ -14,7 +14,11 @@ set -o pipefail
 source /usr/libexec/helper-scripts/has.bsh
 source /usr/libexec/helper-scripts/log_run_die.sh
 source /usr/libexec/helper-scripts/package_installed_check.sh
-source /usr/libexec/helper-scripts/check_runtime.bsh
+source /usr/libexec/helper-scripts/check_runtime.bsh || true
+if ! declare -F was_executed >/dev/null; then
+  printf '%s\n' "$0: ERROR: cannot source check_runtime.bsh!" >&2
+  exit 1
+fi
 
 if was_sourced "${BASH_SOURCE[0]}"; then
   die 1 "Do not source this script!"
