@@ -8,8 +8,11 @@ set -o nounset
 set -o errtrace
 set -o pipefail
 
-source /usr/libexec/helper-scripts/check_runtime.bsh || true
-if ! declare -F was_executed >/dev/null; then
+source_rc=0
+source /usr/libexec/helper-scripts/check_runtime.bsh || source_rc="$?"
+if [ "${source_rc}" != 0 ] \
+  || ! declare -F was_executed >/dev/null \
+  || ! declare -F was_sourced >/dev/null; then
   printf '%s\n' "$0: ERROR: cannot source check_runtime.bsh!" >&2
   exit 1
 fi
