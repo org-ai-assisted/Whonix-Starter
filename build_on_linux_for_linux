@@ -7,6 +7,9 @@ set -o errexit
 set -o nounset
 set -o errtrace
 set -o pipefail
+shopt -s inherit_errexit
+shopt -s shift_verbose
+export LC_ALL=C
 
 source_rc=0
 source /usr/libexec/helper-scripts/check_runtime.bsh || source_rc="$?"
@@ -16,6 +19,9 @@ if [ "${source_rc}" != 0 ] \
   printf '%s\n' "$0: ERROR: cannot source check_runtime.bsh!" >&2
   exit 1
 fi
+
+# shellcheck disable=SC1091
+source /usr/libexec/helper-scripts/log_run_die.sh
 
 if was_sourced "${BASH_SOURCE[0]}"; then
   die 1 "Do not source this script!"
